@@ -7,7 +7,7 @@
 }
 
 body {
-    display: flex; /* Mantém o menu e o mapa lado a lado */
+    display: flex; 
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
@@ -16,9 +16,9 @@ body {
 
 /* Menu Lateral */
 #sidebar {
-    width: 260px;
-    background-color: #0a192f; /* Azul escuro profissional */
-    color: #64ffda; /* Ciano neon */
+    width: 280px;
+    background-color: #0a192f; 
+    color: #64ffda; 
     display: flex;
     flex-direction: column;
     z-index: 1000;
@@ -32,9 +32,10 @@ body {
     border-bottom: 2px solid #64ffda;
 }
 
-.sidebar-header img {
-    width: 50px;
+.sidebar-header i {
+    color: #64ffda;
     margin-bottom: 10px;
+    display: block;
 }
 
 .sidebar-header h2 {
@@ -42,14 +43,50 @@ body {
     letter-spacing: 2px;
 }
 
-.menu-content {
+/* Barra de Pesquisa Estilo Google */
+.search-container {
     padding: 20px;
+}
+
+.search-box {
+    background-color: #f8f9fa;
+    border-radius: 24px;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.search-box:focus-within {
+    background-color: #ffffff;
+    box-shadow: 0 1px 6px rgba(100, 255, 218, 0.5);
+    border-color: #64ffda;
+}
+
+.search-box i {
+    color: #70757a;
+    font-size: 14px;
+}
+
+.search-box input {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    color: #202124;
+    font-size: 14px;
+}
+
+/* Conteúdo do Menu */
+.menu-content {
+    padding: 0 20px 20px 20px;
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-/* Botões Personalizados */
 .btn-menu {
     background: transparent;
     border: 1px solid #64ffda;
@@ -60,16 +97,18 @@ body {
     transition: all 0.3s ease;
     text-align: left;
     font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .btn-menu:hover {
     background: rgba(100, 255, 218, 0.1);
     padding-left: 20px;
-    box-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
 }
 
 /* Área do Mapa */
 #map {
-    flex-grow: 1; /* Ocupa todo o espaço restante */
+    flex-grow: 1;
     height: 100vh;
 }
