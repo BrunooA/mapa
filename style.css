@@ -1,5 +1,3 @@
-/* style.css */
-
 * { 
     margin: 0; 
     padding: 0; 
@@ -14,7 +12,6 @@ body {
     background-color: #020c1b;
 }
 
-/* Menu Lateral */
 #sidebar {
     width: 280px;
     background-color: #0a192f; 
@@ -32,20 +29,15 @@ body {
     border-bottom: 2px solid #64ffda;
 }
 
-.sidebar-header i {
-    color: #64ffda;
-    margin-bottom: 10px;
-    display: block;
-}
-
 .sidebar-header h2 {
     font-size: 1.4rem;
     letter-spacing: 2px;
 }
 
-/* Barra de Pesquisa Estilo Google */
+/* Barra de Pesquisa */
 .search-container {
     padding: 20px;
+    position: relative; /* Importante para a lista flutuar */
 }
 
 .search-box {
@@ -55,7 +47,6 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    transition: all 0.3s ease;
     border: 1px solid transparent;
 }
 
@@ -65,21 +56,44 @@ body {
     border-color: #64ffda;
 }
 
-.search-box i {
-    color: #70757a;
-    font-size: 14px;
-}
-
 .search-box input {
     background: transparent;
     border: none;
     outline: none;
     width: 100%;
     color: #202124;
-    font-size: 14px;
 }
 
-/* Conteúdo do Menu */
+/* Lista de Sugestões (Estilo Google) */
+.suggestions-list {
+    background-color: white;
+    border-radius: 8px;
+    margin-top: 5px;
+    max-height: 250px;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    position: absolute;
+    width: calc(100% - 40px);
+    z-index: 2000;
+}
+
+.suggestion-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    color: #333;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.suggestion-item:hover { background-color: #f1f3f4; }
+
+.suggestion-item i { color: #70757a; }
+
+/* Menu */
 .menu-content {
     padding: 0 20px 20px 20px;
     display: flex;
@@ -94,21 +108,13 @@ body {
     padding: 12px;
     cursor: pointer;
     border-radius: 5px;
-    transition: all 0.3s ease;
     text-align: left;
-    font-size: 0.9rem;
     display: flex;
     align-items: center;
     gap: 10px;
+    transition: 0.3s;
 }
 
-.btn-menu:hover {
-    background: rgba(100, 255, 218, 0.1);
-    padding-left: 20px;
-}
+.btn-menu:hover { background: rgba(100, 255, 218, 0.1); }
 
-/* Área do Mapa */
-#map {
-    flex-grow: 1;
-    height: 100vh;
-}
+#map { flex-grow: 1; height: 100vh; }
