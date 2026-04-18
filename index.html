@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2864/2864448.png">
+    <title>Mapa de Gestão</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <img src="https://cdn-icons-png.flaticon.com/512/2864/2864448.png" alt="Logo">
+            <h2>MAPA<h2>
+        </div>
+
+        <nav class="menu-content">
+            <button class="btn-menu" onclick="irParaVilaVelha()">📍 Vila Velha</button>
+            <button class="btn-menu" onclick="irParaVitoria()">📍 Vitória</button>
+            <button class="btn-menu" onclick="minhaLocalizacao()">🚀 Minha Localização</button>
+        </nav>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Inicialização do Mapa
+        const map = L.map('map').setView([-20.3297, -40.2944], 13);
+
+        // Consumo da API de Mapas
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        function irParaVilaVelha() {
+            map.flyTo([-20.3297, -40.2944], 14);
+            L.marker([-20.3297, -40.2944]).addTo(map).bindPopup('Vila Velha - ES').openPopup();
+        }
+
+        function irParaVitoria() {
+            map.flyTo([-20.2976, -40.2958], 14);
+            L.marker([-20.2976, -40.2958]).addTo(map).bindPopup('Vitória - ES').openPopup();
+        }
+
+        function minhaLocalizacao() {
+            map.locate({setView: true, maxZoom: 16});
+        }
+
+        map.on('locationfound', (e) => {
+            L.marker(e.latlng).addTo(map).bindPopup("Você está aqui!").openPopup();
+        });
+    </script>
+</body>
+</html>
