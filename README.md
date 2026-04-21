@@ -1,4 +1,4 @@
-# 📍 Projeto Mapa (PIE) - UniFoco
+# 📍 Projeto Mapa
 
 O objetivo principal é integrar geolocalização com persistência de dados local (CRUD) para auxiliar na organização e foco acadêmico.
 
