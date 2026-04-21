@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mapa Mobile</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { height: 100vh; font-family: sans-serif; overflow: hidden; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; }
+
+    /* Estilo Geral (Mobile Primeiro) */
+    .ui-overlay {
+        position: absolute;
+        top: 60px;
+        left: 10px;
+        right: 10px;
+        z-index: 1100;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centraliza no desktop */
+    }
+
+    .search-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        pointer-events: auto;
+        width: 100%;
+        max-width: 450px; /* Limita a largura no computador */
+    }
+
+    .search-box { display: flex; align-items: center; padding: 0 16px; height: 48px; }
+    .search-box input { flex: 1; border: none; outline: none; font-size: 16px; padding: 0 12px; }
+    .menu-icon, .search-icon { color: #70757a; font-size: 20px; }
+
+    /* Ajuste dos botões para não esticarem */
+    .chips-container {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 10px;
+        margin-top: 15px;
+        pointer-events: auto;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 2px 5px 10px 5px;
+        scrollbar-width: none;
+        width: 100%;
+        max-width: 500px; /* Limita o grupo de botões */
+        justify-content: flex-start; /* Alinha à esquerda no mobile */
+    }
+
+    /* QUANDO FOR COMPUTADOR (Telas maiores que 768px) */
+    @media (min-width: 768px) {
+        .ui-overlay {
+            top: 20px; /* No note não precisa descer tanto */
+            left: 20px;
+            align-items: flex-start; /* Botões no canto esquerdo */
+        }
+        .chips-container {
+            justify-content: flex-start;
+        }
+    }
+
+    .chip {
+        background: white;
+        border: 1px solid #dadce0;
+        padding: 0 18px;
+        height: 48px;
+        border-radius: 24px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        font-size: 15px;
+        font-weight: 500;
+        color: #3c4043;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .loc-btn { min-width: 48px; width: 48px; justify-content: center; border-radius: 50%; }
+    .chip i { color: #1a73e8; font-size: 18px; }
+</style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <div class="ui-overlay">
+        <div class="search-card">
+            <div class="search-box">
+                <i class="bi bi-list menu-icon"></i>
+                <input type="text" id="map-search" placeholder="Pesquisar no ES" autocomplete="off">
+                <i class="bi bi-search search-icon"></i>
+            </div>
+            <div id="search-results"></div>
+        </div>
+        <div class="chips-container">
+            <button class="chip loc-btn" onclick="minhaLocalizacao()">
+                <i class="bi bi-crosshair"></i>
+            </button>
+            <button class="chip" onclick="irParaVilaVelha()">
+                <i class="bi bi-geo-alt"></i> Vila Velha
+            </button>
+            <button class="chip" onclick="irParaVitoria()">
+                <i class="bi bi-geo-alt"></i> Vitória
+            </button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map', { zoomControl: false }).setView([-20.3297, -40.2944], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        let marcadorLocalizacao = null;
+
+        function irParaVilaVelha() { map.flyTo([-20.3297, -40.2944], 14); }
+        function irParaVitoria() { map.flyTo([-20.2976, -40.2958], 14); }
+
+        // A FUNÇÃO QUE FALTAVA:
+        function minhaLocalizacao() {
+            map.locate({ setView: true, maxZoom: 16 });
+        }
+
+        map.on('locationfound', (e) => {
+            if (marcadorLocalizacao) map.removeLayer(marcadorLocalizacao);
+            marcadorLocalizacao = L.marker(e.latlng).addTo(map)
+                .bindPopup("Você está aqui!").openPopup();
+        });
+
+        map.on('locationerror', (e) => {
+            alert("Não foi possível acessar sua localização. Verifique o GPS.");
+        });
+
+        const searchInput = document.getElementById('map-search');
+        const resultsContainer = document.getElementById('search-results');
+
+        searchInput.addEventListener('input', async (e) => {
+            const query = e.target.value;
+            if (query.length < 3) { resultsContainer.style.display = 'none'; return; }
+
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=br&limit=5`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                exibirResultados(data);
+            } catch (err) { console.error(err); }
+        });
+
+        function exibirResultados(data) {
+            resultsContainer.innerHTML = '';
+            if (data.length === 0) { resultsContainer.style.display = 'none'; return; }
+            
+            data.forEach(place => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerHTML = `<i class="bi bi-geo-alt"></i><span>${place.display_name.split(',')[0]}</span>`;
+                div.onclick = () => {
+                    const lat = parseFloat(place.lat);
+                    const lon = parseFloat(place.lon);
+                    map.flyTo([lat, lon], 16);
+                    resultsContainer.style.display = 'none';
+                };
+                resultsContainer.appendChild(div);
+            });
+            resultsContainer.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
