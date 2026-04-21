@@ -4,113 +4,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mapa Mobile</title>
+    <title>Mapa</title>
+
+    <link rel="icon" type="image/png" href="logo.png">
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { height: 100vh; font-family: sans-serif; overflow: hidden; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; }
+        /* ... (seu CSS permanece o mesmo) ... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* Estilo Geral (Mobile Primeiro) */
-    .ui-overlay {
-        position: absolute;
-        top: 60px;
-        left: 10px;
-        right: 10px;
-        z-index: 1100;
-        pointer-events: none;
-        display: flex;
-        flex-direction: column;
-        align-items: center; /* Centraliza no desktop */
-    }
+        body {
+            height: 100vh;
+            font-family: sans-serif;
+            overflow: hidden;
+            background: #f0f2f5;
+        }
 
-    .search-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        pointer-events: auto;
-        width: 100%;
-        max-width: 450px; /* Limita a largura no computador */
-    }
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            z-index: 1;
+        }
 
-    .search-box { display: flex; align-items: center; padding: 0 16px; height: 48px; }
-    .search-box input { flex: 1; border: none; outline: none; font-size: 16px; padding: 0 12px; }
-    .menu-icon, .search-icon { color: #70757a; font-size: 20px; }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100%;
+            background: white;
+            z-index: 2000;
+            transition: 0.3s;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+        }
 
-    /* Ajuste dos botões para não esticarem */
-    .chips-container {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 10px;
-        margin-top: 15px;
-        pointer-events: auto;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding: 2px 5px 10px 5px;
-        scrollbar-width: none;
-        width: 100%;
-        max-width: 500px; /* Limita o grupo de botões */
-        justify-content: flex-start; /* Alinha à esquerda no mobile */
-    }
+        .sidebar.active {
+            left: 0;
+        }
 
-    /* QUANDO FOR COMPUTADOR (Telas maiores que 768px) */
-    @media (min-width: 768px) {
+        .sidebar-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            gap: 10px;
+        }
+
+        .brand-logo {
+            width: 80px;
+            height: auto;
+            margin-bottom: 5px;
+        }
+
+        .overlay-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1999;
+        }
+
         .ui-overlay {
-            top: 20px; /* No note não precisa descer tanto */
-            left: 20px;
-            align-items: flex-start; /* Botões no canto esquerdo */
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            right: 10px;
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
         }
+
+        .search-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            height: 48px;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            padding: 0 12px;
+        }
+
+        #results-box {
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            border-top: 1px solid #eee;
+        }
+
+        .item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+        }
+
+        .item:hover {
+            background: #f8f9fa;
+        }
+
+        .history-label {
+            background: #f1f3f4;
+            padding: 5px 16px;
+            font-size: 12px;
+            color: #70757a;
+            font-weight: bold;
+        }
+
         .chips-container {
-            justify-content: flex-start;
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            pointer-events: auto;
+            width: 100%;
+            max-width: 500px;
+            overflow-x: auto;
+            padding: 5px;
         }
-    }
 
-    .chip {
-        background: white;
-        border: 1px solid #dadce0;
-        padding: 0 18px;
-        height: 48px;
-        border-radius: 24px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-        font-size: 15px;
-        font-weight: 500;
-        color: #3c4043;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-        cursor: pointer;
-        flex-shrink: 0;
-    }
+        .chip {
+            background: white;
+            border: 1px solid #dadce0;
+            padding: 0 15px;
+            height: 40px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
 
-    .loc-btn { min-width: 48px; width: 48px; justify-content: center; border-radius: 50%; }
-    .chip i { color: #1a73e8; font-size: 18px; }
-</style>
+        .menu-action-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .btn-clear {
+            background: #fee;
+            color: #d93025;
+        }
+
+        .btn-stats {
+            background: #e8f0fe;
+            color: #1967d2;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .ui-overlay {
+                top: 20px;
+                left: 20px;
+                align-items: flex-start;
+            }
+        }
+    </style>
 </head>
 
 <body>
+    <div id="overlay-bg" class="overlay-bg" onclick="toggleMenu()"></div>
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <img src="logo.png" alt="Logo UniFoco" class="brand-logo">
+            <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                <h2><i class="bi bi-gear-fill"></i> Dados</h2>
+                <i class="bi bi-x-lg" style="cursor:pointer" onclick="toggleMenu()"></i>
+            </div>
+        </div>
+        <div class="menu-action-btn btn-stats">
+            <i class="bi bi-info-circle"></i> <span id="fav-count">0 Favoritos salvos</span>
+        </div>
+        <div id="fav-list" style="margin-top: 15px; max-height: 50vh; overflow-y: auto;"></div>
+        <button class="menu-action-btn btn-clear" onclick="limparTudo()">
+            <i class="bi bi-trash3"></i> Limpar Tudo
+        </button>
+    </div>
+
     <div id="map"></div>
+
     <div class="ui-overlay">
         <div class="search-card">
             <div class="search-box">
-                <i class="bi bi-list menu-icon"></i>
-                <input type="text" id="map-search" placeholder="Pesquisar no ES" autocomplete="off">
-                <i class="bi bi-search search-icon"></i>
+                <i class="bi bi-list" style="cursor:pointer; font-size: 22px;" onclick="toggleMenu()"></i>
+                <input type="text" id="map-search" placeholder="Pesquisar no ES..." autocomplete="off"
+                    onfocus="mostrarHistorico()">
+                <i class="bi bi-search"></i>
             </div>
-            <div id="search-results"></div>
+            <div id="results-box"></div>
         </div>
         <div class="chips-container">
-            <button class="chip loc-btn" onclick="minhaLocalizacao()">
-                <i class="bi bi-crosshair"></i>
-            </button>
-            <button class="chip" onclick="irParaVilaVelha()">
-                <i class="bi bi-geo-alt"></i> Vila Velha
-            </button>
-            <button class="chip" onclick="irParaVitoria()">
-                <i class="bi bi-geo-alt"></i> Vitória
-            </button>
+            <button class="chip" onclick="map.locate({setView: true, maxZoom: 16})"><i
+                    class="bi bi-crosshair"></i></button>
+            <button class="chip" onclick="map.flyTo([-20.3297, -40.2944], 14)">Vila Velha</button>
+            <button class="chip" onclick="map.flyTo([-20.2976, -40.2958], 14)">Vitória</button>
         </div>
     </div>
 
@@ -119,32 +247,58 @@
         const map = L.map('map', { zoomControl: false }).setView([-20.3297, -40.2944], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        let marcadorLocalizacao = null;
+        let marcadorPesquisa = null;
 
-        function irParaVilaVelha() { map.flyTo([-20.3297, -40.2944], 14); }
-        function irParaVitoria() { map.flyTo([-20.2976, -40.2958], 14); }
-
-        // A FUNÇÃO QUE FALTAVA:
-        function minhaLocalizacao() {
-            map.locate({ setView: true, maxZoom: 16 });
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('active');
+            const bg = document.getElementById('overlay-bg');
+            bg.style.display = bg.style.display === 'block' ? 'none' : 'block';
+            atualizarStats();
         }
 
-        map.on('locationfound', (e) => {
-            if (marcadorLocalizacao) map.removeLayer(marcadorLocalizacao);
-            marcadorLocalizacao = L.marker(e.latlng).addTo(map)
-                .bindPopup("Você está aqui!").openPopup();
-        });
-
-        map.on('locationerror', (e) => {
-            alert("Não foi possível acessar sua localização. Verifique o GPS.");
-        });
-
         const searchInput = document.getElementById('map-search');
-        const resultsContainer = document.getElementById('search-results');
+        const resultsBox = document.getElementById('results-box');
 
+        // EXPLIQUE: Aqui lemos o LocalStorage (READ) para mostrar buscas anteriores antes mesmo do usuário digitar
+        function mostrarHistorico() {
+            if (searchInput.value.length > 0) return;
+            const history = JSON.parse(localStorage.getItem('mapa-history') || '[]');
+            if (history.length === 0) { resultsBox.style.display = 'none'; return; }
+            resultsBox.innerHTML = '<div class="history-label"><i class="bi bi-clock-history"></i> PESQUISAS RECENTES</div>';
+            history.forEach(h => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `<i class="bi bi-arrow-counterclockwise"></i> <span>${h.nome}</span>`;
+                div.onclick = () => irParaLocal(h.nome, h.lat, h.lon);
+                resultsBox.appendChild(div);
+            });
+            resultsBox.style.display = 'block';
+        }
+
+        function salvarNoHistorico(nome, lat, lon) {
+            let history = JSON.parse(localStorage.getItem('mapa-history') || '[]');
+            history = history.filter(h => h.nome !== nome);
+            history.unshift({ nome, lat, lon });
+            if (history.length > 5) history.pop();
+            localStorage.setItem('mapa-history', JSON.stringify(history));
+        }
+
+        // EXPLIQUE: Esta função gerencia o estado visual (limpa busca e coloca marcador no mapa)
+        function irParaLocal(nome, lat, lon) {
+            if (marcadorPesquisa) map.removeLayer(marcadorPesquisa);
+
+            marcadorPesquisa = L.marker([lat, lon]).addTo(map)
+                .bindPopup(`<b>${nome}</b>`).openPopup();
+
+            map.flyTo([lat, lon], 16);
+            searchInput.value = '';
+            resultsBox.style.display = 'none';
+        }
+
+        // EXPLIQUE: O motor de NETWORKING. Usamos 'async/await' para a página não travar enquanto espera a API externa
         searchInput.addEventListener('input', async (e) => {
             const query = e.target.value;
-            if (query.length < 3) { resultsContainer.style.display = 'none'; return; }
+            if (query.length < 3) { mostrarHistorico(); return; }
 
             const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=br&limit=5`;
             try {
@@ -155,23 +309,65 @@
         });
 
         function exibirResultados(data) {
-            resultsContainer.innerHTML = '';
-            if (data.length === 0) { resultsContainer.style.display = 'none'; return; }
-            
+            resultsBox.innerHTML = '';
             data.forEach(place => {
+                const nomeCurto = place.display_name.split(',')[0];
                 const div = document.createElement('div');
-                div.className = 'suggestion-item';
-                div.innerHTML = `<i class="bi bi-geo-alt"></i><span>${place.display_name.split(',')[0]}</span>`;
+                div.className = 'item';
+                // EXPLIQUE: Aqui injetamos o botão que dispara o CREATE do nosso CRUD local
+                div.innerHTML = `<i class="bi bi-geo-alt"></i><span style="flex:1">${nomeCurto}</span>
+                                <i class="bi bi-plus-circle" style="color:#1a73e8" onclick="operacaoCreate('${nomeCurto}', ${place.lat}, ${place.lon}); event.stopPropagation();"></i>`;
                 div.onclick = () => {
-                    const lat = parseFloat(place.lat);
-                    const lon = parseFloat(place.lon);
-                    map.flyTo([lat, lon], 16);
-                    resultsContainer.style.display = 'none';
+                    irParaLocal(nomeCurto, place.lat, place.lon);
+                    salvarNoHistorico(nomeCurto, place.lat, place.lon);
                 };
-                resultsContainer.appendChild(div);
+                resultsBox.appendChild(div);
             });
-            resultsContainer.style.display = 'block';
+            resultsBox.style.display = 'block';
+        }
+
+        // EXPLIQUE: Operação CREATE. Transformamos um dado volátil da API em dado persistente no navegador (LocalStorage)
+        function operacaoCreate(nome, lat, lon) {
+            let favs = JSON.parse(localStorage.getItem('mapa-favs') || '[]');
+            favs.push({ id: Date.now(), nome, lat, lon });
+            localStorage.setItem('mapa-favs', JSON.stringify(favs));
+            alert("Sucesso: Local salvo!");
+            atualizarStats();
+        }
+
+        // EXPLIQUE: Operação READ. Sincroniza a interface do menu lateral com os dados salvos
+        function atualizarStats() {
+            const favs = JSON.parse(localStorage.getItem('mapa-favs') || '[]');
+            document.getElementById('fav-count').innerText = `${favs.length} Favoritos salvos`;
+            const list = document.getElementById('fav-list');
+            list.innerHTML = '';
+            favs.forEach(f => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `<i class="bi bi-star"></i><span style="flex:1">${f.nome}</span>
+                                <i class="bi bi-trash" style="color:red" onclick="operacaoDelete(${f.id})"></i>`;
+                div.onclick = () => { irParaLocal(f.nome, f.lat, f.lon); toggleMenu(); };
+                list.appendChild(div);
+            });
+        }
+
+        // EXPLIQUE: Operação DELETE. Remove o item específico e atualiza o armazenamento
+        function operacaoDelete(id) {
+            let favs = JSON.parse(localStorage.getItem('mapa-favs') || '[]');
+            favs = favs.filter(f => f.id !== id);
+            localStorage.setItem('mapa-favs', JSON.stringify(favs));
+            atualizarStats();
+        }
+
+        function limparTudo() {
+            if (confirm("Deseja apagar tudo?")) {
+                localStorage.clear();
+                if (marcadorPesquisa) map.removeLayer(marcadorPesquisa);
+                atualizarStats();
+                resultsBox.style.display = 'none';
+            }
         }
     </script>
 </body>
+
 </html>
