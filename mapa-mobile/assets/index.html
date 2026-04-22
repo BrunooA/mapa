@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mapa UniFoco</title>
+    <title>Mapa</title>
 
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -127,6 +127,7 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         let marcadorPesquisa = null;
+        let debounceTimer; // Timer para controlar o limite de requisições
 
         function toggleMenu() {
             document.getElementById('sidebar').classList.toggle('active');
@@ -169,16 +170,34 @@
             resultsBox.style.display = 'none';
         }
 
-        // MOTOR DE BUSCA: Ajustado para evitar erro 400 e filtrar ES
-        searchInput.addEventListener('input', async (e) => {
+        // DEBOUNCE: Espera o usuário parar de digitar por 500ms antes de buscar
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
             const query = e.target.value;
-            if (query.length < 3) { mostrarHistorico(); return; }
+            
+            if (query.length < 3) {
+                mostrarHistorico();
+                return;
+            }
 
+            debounceTimer = setTimeout(() => {
+                buscarLocal(query);
+            }, 500); 
+        });
+
+        async function buscarLocal(query) {
             const buscaFormatada = `${query}, Espirito Santo, Brazil`;
             const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(buscaFormatada)}&limit=10`;
 
             try {
                 const response = await fetch(url);
+                
+                if (response.status === 429) {
+                    resultsBox.innerHTML = '<div class="item" style="color:orange">Muitas buscas seguidas. Aguarde um instante...</div>';
+                    resultsBox.style.display = 'block';
+                    return;
+                }
+
                 const data = await response.json();
                 
                 if (Array.isArray(data)) {
@@ -187,14 +206,12 @@
                         place.display_name.toLowerCase().includes("espirito santo")
                     );
                     exibirResultados(apenasES);
-                } else {
-                    exibirResultados([]);
                 }
             } catch (err) { 
                 console.error(err);
-                exibirResultados([]); 
+                resultsBox.innerHTML = '<div class="item" style="color:red">Erro na conexão com o mapa.</div>';
             }
-        });
+        }
 
         function exibirResultados(data) {
             resultsBox.innerHTML = '';
