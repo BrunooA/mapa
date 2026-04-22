@@ -4,82 +4,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mapa</title>
+    <title>Mapa Interativo ES</title>
 
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { height: 100vh; font-family: sans-serif; overflow: hidden; background: #f0f2f5; }
-        #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            font-family: sans-serif;
+            overflow: hidden;
+            background: #f0f2f5;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            z-index: 1;
+        }
 
         .sidebar {
-            position: fixed; top: 0; left: -300px; width: 300px; height: 100%;
-            background: white; z-index: 2000; transition: 0.3s;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2); padding: 20px;
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100%;
+            background: white;
+            z-index: 2000;
+            transition: 0.3s;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
         }
-        .sidebar.active { left: 0; }
+
+        .sidebar.active {
+            left: 0;
+        }
 
         .sidebar-header {
-            display: flex; flex-direction: column; align-items: center;
-            margin-bottom: 20px; border-bottom: 1px solid #eee;
-            padding-bottom: 10px; gap: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            gap: 10px;
         }
 
-        .brand-logo { width: 80px; height: auto; }
+        .brand-logo {
+            width: 80px;
+            height: auto;
+        }
 
         .overlay-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5); display: none; z-index: 1999;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1999;
         }
 
         .ui-overlay {
-            position: absolute; top: 50px; left: 10px; right: 10px;
-            z-index: 1100; display: flex; flex-direction: column;
-            align-items: center; pointer-events: none;
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            right: 10px;
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
         }
 
         .search-card {
-            background: white; border-radius: 8px;
+            background: white;
+            border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            pointer-events: auto; width: 100%; max-width: 450px; overflow: hidden;
+            pointer-events: auto;
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
         }
 
-        .search-box { display: flex; align-items: center; padding: 0 16px; height: 48px; }
-        .search-box input { flex: 1; border: none; outline: none; font-size: 16px; padding: 0 12px; }
+        .search-box {
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            height: 48px;
+        }
 
-        #results-box { max-height: 300px; overflow-y: auto; display: none; border-top: 1px solid #eee; }
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            padding: 0 12px;
+        }
+
+        #results-box {
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            border-top: 1px solid #eee;
+        }
 
         .item {
-            padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #eee;
-            display: flex; align-items: center; gap: 10px; background: white;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
         }
-        .item:hover { background: #f8f9fa; }
 
-        .history-label { background: #f1f3f4; padding: 5px 16px; font-size: 12px; color: #70757a; font-weight: bold; }
+        .item:hover {
+            background: #f8f9fa;
+        }
+
+        .history-label {
+            background: #f1f3f4;
+            padding: 5px 16px;
+            font-size: 12px;
+            color: #70757a;
+            font-weight: bold;
+        }
 
         .chips-container {
-            display: flex; gap: 10px; margin-top: 15px; pointer-events: auto;
-            width: 100%; max-width: 500px; overflow-x: auto; padding: 5px;
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            pointer-events: auto;
+            width: 100%;
+            max-width: 500px;
+            overflow-x: auto;
+            padding: 5px;
         }
 
         .chip {
-            background: white; border: 1px solid #dadce0; padding: 0 15px;
-            height: 40px; border-radius: 20px; font-size: 14px;
-            display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;
+            background: white;
+            border: 1px solid #dadce0;
+            padding: 0 15px;
+            height: 40px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            white-space: nowrap;
         }
 
         .menu-action-btn {
-            width: 100%; padding: 12px; margin-top: 10px; border: none;
-            border-radius: 5px; cursor: pointer; display: flex;
-            align-items: center; gap: 10px; font-weight: bold;
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
         }
-        .btn-clear { background: #fee; color: #d93025; }
-        .btn-stats { background: #e8f0fe; color: #1967d2; margin-top: 20px; }
 
-        @media (min-width: 768px) { .ui-overlay { top: 20px; left: 20px; align-items: flex-start; } }
+        .btn-clear {
+            background: #fee;
+            color: #d93025;
+        }
+
+        .btn-stats {
+            background: #e8f0fe;
+            color: #1967d2;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .ui-overlay {
+                top: 20px;
+                left: 20px;
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 
@@ -109,13 +226,15 @@
         <div class="search-card">
             <div class="search-box">
                 <i class="bi bi-list" style="cursor:pointer; font-size: 22px;" onclick="toggleMenu()"></i>
-                <input type="text" id="map-search" placeholder="Pesquisar no ES..." autocomplete="off" onfocus="mostrarHistorico()">
+                <input type="text" id="map-search" placeholder="Pesquisar no ES..." autocomplete="off"
+                    onfocus="mostrarHistorico()">
                 <i class="bi bi-search"></i>
             </div>
             <div id="results-box"></div>
         </div>
         <div class="chips-container">
-            <button class="chip" onclick="map.locate({setView: true, maxZoom: 16})"><i class="bi bi-crosshair"></i></button>
+            <button class="chip" onclick="map.locate({setView: true, maxZoom: 16})"><i
+                    class="bi bi-crosshair"></i></button>
             <button class="chip" onclick="map.flyTo([-20.3297, -40.2944], 14)">Vila Velha</button>
             <button class="chip" onclick="map.flyTo([-20.2976, -40.2958], 14)">Vitória</button>
         </div>
@@ -123,11 +242,12 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Inicialização do mapa utilizando a biblioteca Leaflet e consumo de tiles do OpenStreetMap
         const map = L.map('map', { zoomControl: false }).setView([-20.3297, -40.2944], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         let marcadorPesquisa = null;
-        let debounceTimer; // Timer para controlar o limite de requisições
+        let debounceTimer;
 
         function toggleMenu() {
             document.getElementById('sidebar').classList.toggle('active');
@@ -139,6 +259,7 @@
         const searchInput = document.getElementById('map-search');
         const resultsBox = document.getElementById('results-box');
 
+        // READ: Recupera e exibe o histórico de pesquisas armazenado localmente em formato JSON
         function mostrarHistorico() {
             if (searchInput.value.length > 0) return;
             const history = JSON.parse(localStorage.getItem('mapa-history') || '[]');
@@ -154,14 +275,6 @@
             resultsBox.style.display = 'block';
         }
 
-        function salvarNoHistorico(nome, lat, lon) {
-            let history = JSON.parse(localStorage.getItem('mapa-history') || '[]');
-            history = history.filter(h => h.nome !== nome);
-            history.unshift({ nome, lat, lon });
-            if (history.length > 5) history.pop();
-            localStorage.setItem('mapa-history', JSON.stringify(history));
-        }
-
         function irParaLocal(nome, lat, lon) {
             if (marcadorPesquisa) map.removeLayer(marcadorPesquisa);
             marcadorPesquisa = L.marker([lat, lon]).addTo(map).bindPopup(`<b>${nome}</b>`).openPopup();
@@ -170,46 +283,36 @@
             resultsBox.style.display = 'none';
         }
 
-        // DEBOUNCE: Espera o usuário parar de digitar por 500ms antes de buscar
+        // DEBOUNCE: Técnica de otimização para reduzir o número de requisições à API durante a digitação
         searchInput.addEventListener('input', (e) => {
             clearTimeout(debounceTimer);
             const query = e.target.value;
-            
-            if (query.length < 3) {
-                mostrarHistorico();
-                return;
-            }
-
-            debounceTimer = setTimeout(() => {
-                buscarLocal(query);
-            }, 500); 
+            if (query.length < 3) { mostrarHistorico(); return; }
+            debounceTimer = setTimeout(() => { buscarLocal(query); }, 500);
         });
 
+        // NETWORKING: Realiza a chamada assíncrona com filtro rigoroso para o ES
         async function buscarLocal(query) {
-            const buscaFormatada = `${query}, Espirito Santo, Brazil`;
-            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(buscaFormatada)}&limit=10`;
+            // Delimitação geográfica do Espírito Santo (Geofencing)
+            const viewbox = "-41.88,-21.31,-39.67,-17.88";
+
+            // Reforça a busca adicionando o estado ao texto, mas mantemos o viewbox
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", Espírito Santo")}&viewbox=${viewbox}&bounded=1&limit=10&addressdetails=1`;
 
             try {
                 const response = await fetch(url);
-                
-                if (response.status === 429) {
-                    resultsBox.innerHTML = '<div class="item" style="color:orange">Muitas buscas seguidas. Aguarde um instante...</div>';
-                    resultsBox.style.display = 'block';
-                    return;
-                }
-
+                if (response.status === 429) return; // Proteção contra excesso de requisições
                 const data = await response.json();
-                
-                if (Array.isArray(data)) {
-                    const apenasES = data.filter(place => 
-                        place.display_name.toLowerCase().includes("espírito santo") ||
-                        place.display_name.toLowerCase().includes("espirito santo")
-                    );
-                    exibirResultados(apenasES);
-                }
-            } catch (err) { 
-                console.error(err);
-                resultsBox.innerHTML = '<div class="item" style="color:red">Erro na conexão com o mapa.</div>';
+
+                // FILTRO EXTRA: Verificamos no JSON se o estado retornado é realmente o ES
+                const resultadosFiltrados = data.filter(place => {
+                    const estado = place.address ? (place.address.state || "") : "";
+                    return estado.toLowerCase().includes("espírito santo") || estado.toLowerCase().includes("es");
+                });
+
+                exibirResultados(resultadosFiltrados);
+            } catch (err) {
+                console.error("Erro na requisição:", err);
             }
         }
 
@@ -221,30 +324,27 @@
                 data.forEach(place => {
                     const partes = place.display_name.split(',');
                     const nomeCurto = partes[0];
-                    const detalhe = partes[1] ? ` (${partes[1].trim()})` : '';
-
                     const div = document.createElement('div');
                     div.className = 'item';
-                    div.innerHTML = `<i class="bi bi-geo-alt"></i><span style="flex:1">${nomeCurto}${detalhe}</span>
+                    div.innerHTML = `<i class="bi bi-geo-alt"></i><span style="flex:1">${nomeCurto}</span>
                                     <i class="bi bi-plus-circle" style="color:#1a73e8" onclick="operacaoCreate('${nomeCurto}', ${place.lat}, ${place.lon}); event.stopPropagation();"></i>`;
-                    div.onclick = () => {
-                        irParaLocal(nomeCurto, place.lat, place.lon);
-                        salvarNoHistorico(nomeCurto, place.lat, place.lon);
-                    };
+                    div.onclick = () => { irParaLocal(nomeCurto, place.lat, place.lon); };
                     resultsBox.appendChild(div);
                 });
             }
             resultsBox.style.display = 'block';
         }
 
+        // CREATE: Adiciona um novo registro ao LocalStorage (Persistência de Dados)
         function operacaoCreate(nome, lat, lon) {
             let favs = JSON.parse(localStorage.getItem('mapa-favs') || '[]');
             favs.push({ id: Date.now(), nome, lat, lon });
             localStorage.setItem('mapa-favs', JSON.stringify(favs));
-            alert("Salvo!");
+            alert("Local favoritado!");
             atualizarStats();
         }
 
+        // READ: Renderiza a lista de favoritos atualizada a partir do armazenamento local
         function atualizarStats() {
             const favs = JSON.parse(localStorage.getItem('mapa-favs') || '[]');
             document.getElementById('fav-count').innerText = `${favs.length} Favoritos`;
@@ -260,6 +360,7 @@
             });
         }
 
+        // DELETE: Remove um objeto específico do array de favoritos utilizando o ID como referência
         function operacaoDelete(id) {
             let favs = JSON.parse(localStorage.getItem('mapa-favs') || '[]');
             favs = favs.filter(f => f.id !== id);
@@ -268,7 +369,7 @@
         }
 
         function limparTudo() {
-            if (confirm("Apagar tudo?")) {
+            if (confirm("Deseja apagar todos os dados salvos?")) {
                 localStorage.clear();
                 if (marcadorPesquisa) map.removeLayer(marcadorPesquisa);
                 atualizarStats();
@@ -277,4 +378,5 @@
         }
     </script>
 </body>
+
 </html>
